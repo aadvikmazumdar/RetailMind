@@ -1,0 +1,17 @@
+pandas
+numpy
+pyarrow
+pyyaml
+tqdm
+kaggle
+scikit-learn
+lightgbm
+torch
+torch-geometric
+fastapi
+uvicorn
+dash
+mlflow
+python-dotenv
+overpy
+osmnx

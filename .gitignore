@@ -1,0 +1,12 @@
+data/
+models/*.lgb
+models/*.json
+venv/
+__pycache__/
+*.pyc
+.env
+*.DS_Store
+.ipynb_checkpoints/
+*.csv
+*.parquet
+*.zip

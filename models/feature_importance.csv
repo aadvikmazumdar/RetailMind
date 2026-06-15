@@ -1,0 +1,17 @@
+feature,importance
+units_sold_roll8,1457
+zero_sales_rate,1370
+units_sold_lag1,910
+units_sold_roll4,645
+sell_price,412
+units_sold_lag2,397
+units_sold_lag4,394
+demand_growth_pct,387
+price_vs_lag_ratio,360
+units_sold_std4,358
+price_change_pct,346
+sell_price_lag1,315
+first_month,314
+first_year,198
+peak_demand_month,105
+mean_elasticity,33

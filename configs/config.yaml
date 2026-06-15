@@ -1,0 +1,4 @@
+paths:
+  raw_m5: data/raw/m5
+  processed: data/processed
+  feature_store: data/feature_store
