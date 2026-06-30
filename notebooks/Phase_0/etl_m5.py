@@ -9,15 +9,25 @@ from pathlib import Path
 import yaml
 from tqdm import tqdm
 
-# WHY yaml config: hardcoding paths breaks when others clone your repo
-# config.yaml is the single source of truth for all paths
-with open("configs/config.yaml") as f:
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+with open(PROJECT_ROOT / "configs" / "config.yaml") as f:
     cfg = yaml.safe_load(f)
 
-RAW = Path(cfg["paths"]["raw_m5"])
-OUT = Path(cfg["paths"]["processed"])
+RAW = PROJECT_ROOT / cfg["paths"]["raw_m5"]
+OUT = PROJECT_ROOT / cfg["paths"]["processed"]
 OUT.mkdir(parents=True, exist_ok=True)
 
+# WHY yaml config: hardcoding paths breaks when others clone your repo
+# config.yaml is the single source of truth for all paths
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+with open(PROJECT_ROOT / "configs" / "config.yaml") as f:
+    cfg = yaml.safe_load(f)
+
+RAW = PROJECT_ROOT / cfg["paths"]["raw_m5"]
+OUT = PROJECT_ROOT / cfg["paths"]["processed"]
+OUT.mkdir(parents=True, exist_ok=True)
 
 def download_m5():
     # WHY kaggle CLI: programmatic download is reproducible
@@ -98,6 +108,10 @@ def build_product_features(melted, day_cols):
         sell_price_min = ('sell_price','min'),
         sell_price_max = ('sell_price','max')
     ).reset_index()
+    # WHY merge cat_id here: category is a property of item_id, constant across
+    # stores — needed downstream for category-prior elasticity assumptions
+    cat_lookup = melted[['item_id', 'cat_id']].drop_duplicates()
+    product_stats = product_stats.merge(cat_lookup, on='item_id', how='left')
     
     # WHY these derived features:
     # zero_sale_rate normalizes zero_sale_days to [0,1] regardless of history length

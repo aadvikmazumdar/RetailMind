@@ -2,23 +2,29 @@
 # PURPOSE: Prove pricing_sensitivity_score predicts real price response,
 # and diagnose which signals drive tier assignment (explainability, not tuning)
 
+# validate_sensitivity.py
+# PURPOSE: Prove pricing_sensitivity_score predicts real price response,
+# and diagnose which signals drive tier assignment (explainability, not tuning)
+
+import sys
 import pandas as pd
 import numpy as np
 from pathlib import Path
-import sys
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from src.etl.m5_utils import load_raw, melt_sales
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-with open("configs/config.yaml") as f:
+with open(PROJECT_ROOT / "configs" / "config.yaml") as f:
     cfg = yaml.safe_load(f)
 
-PROCESSED = Path(cfg["paths"]["processed"])
+PROCESSED = PROJECT_ROOT / cfg["paths"]["processed"]
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "Phase_0"))
+from etl_m5 import load_raw, melt_sales
 
 
 def load_melted():
-    sales, calendar, prices = load_raw()
+    sales, prices, calendar = load_raw()
     melted = melt_sales(sales, calendar, prices)
     return melted
 
@@ -88,10 +94,10 @@ def run_validation(merged):
     print(merged.groupby("sensitivity_tier", observed=True)[signal_cols].mean())
 
     print("\n=== WEIGHTED CONTRIBUTION BY TIER ===")
-    merged["elasticity_contrib"] = 0.20 * merged["elasticity_norm"]
-    merged["snap_contrib"] = 0.25 * merged["snap_norm"]
-    merged["volatility_contrib"] = 0.25 * merged["volatility_norm"]
-    merged["category_contrib"] = 0.30 * merged["category_norm"]
+    merged["elasticity_contrib"] = 0.30 * merged["elasticity_norm"]
+    merged["snap_contrib"] = 0.10 * merged["snap_norm"]
+    merged["volatility_contrib"] = 0.10 * merged["volatility_norm"]
+    merged["category_contrib"] = 0.50 * merged["category_norm"]
     contrib_cols = ["elasticity_contrib", "snap_contrib", "volatility_contrib", "category_contrib"]
     print(merged.groupby("sensitivity_tier", observed=True)[contrib_cols].mean())
 

@@ -2,32 +2,30 @@
 # PURPOSE: Combine 4 weak signals into one pricing_sensitivity_score per item/store
 # This REPLACES raw mean_elasticity as the pricing guardrail input
 
+import sys
 import pandas as pd
 import numpy as np
 import lightgbm as lgb
 from pathlib import Path
-import sys
 import yaml
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from src.etl.m5_utils import load_raw, melt_sales 
 
-with open("configs/config.yaml") as f:
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+with open(PROJECT_ROOT / "configs" / "config.yaml") as f:
     cfg = yaml.safe_load(f)
 
-PROCESSED = Path(cfg["paths"]["processed"])
-MODELS = Path("models")
+PROCESSED = PROJECT_ROOT / cfg["paths"]["processed"]
+MODELS = PROJECT_ROOT / "models"
 
-# WHY these specific priors: published retail economics elasticity ranges
-# per M5 category (FOODS/HOBBIES/HOUSEHOLD), used when no other signal is strong
-# negative = normal economic behavior (price up -> demand down)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "Phase_0"))
+from etl_m5 import load_raw, melt_sales
+
 CATEGORY_PRIORS = {
     "FOODS": -0.5,
     "HOBBIES": -1.6,
     "HOUSEHOLD": -0.7,
 }
 
-# WHY these weights: SNAP and category prior trusted more than raw elasticity
-# (which we know is noisy due to 1.47% price change frequency)
 WEIGHTS = {
     "elasticity": 0.30,
     "snap": 0.10,
@@ -35,13 +33,12 @@ WEIGHTS = {
     "category_prior": 0.50,
 }
 
-
 def load_melted_with_cat():
     # WHY recompute melt again: need cat_id + snap flags at row level
     # which only exist in the melted (not aggregated) data
     # YOUR TASK: copy load_raw() + melt_sales() from etl_m5.py here
     # (same pattern as etl_model_features.py did)
-    sales , calendar, prices = load_raw()
+    sales , prices, calendar = load_raw()
     melted = melt_sales(sales,calendar,prices)
     return melted
     
